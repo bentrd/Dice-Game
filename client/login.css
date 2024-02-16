@@ -1,0 +1,33 @@
+#panelButtons {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.form {
+    display: none;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+}
+
+.playerListWrapper {
+    display: none;
+    flex-flow: column nowrap;
+}
+
+.playerList {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    list-style-type: none;
+}
+
+.playerList span {
+    margin: 0.5em;
+    padding: 0;
+}
+
+#startGameButton {
+    display: none;
+}

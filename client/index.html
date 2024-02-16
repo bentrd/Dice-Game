@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Yahtzee</title>
+		<link rel="stylesheet" href="main.css" />
+		<link rel="stylesheet" href="login.css" />
+	</head>
+	<body>
+		<h1>Yahtzee</h1>
+		<div id="login">
+			<div id="panelButtons">
+				<button onclick="createGamePanel()">Create Game</button>
+				<button onclick="joinGamePanel()">Join Game</button>
+			</div>
+			<div id="joinGamePanel" class="form">
+				<input type="text" id="usernameJoin" placeholder="Username" />
+				<input type="text" id="gameRoomIDJoin" placeholder="Room ID" />
+				<button value="Join Game" onclick="joinGame()">Join Game</button>
+			</div>
+			<div id="createGamePanel" class="form">
+				<input type="text" id="usernameCreate" placeholder="Username" />
+				<div>Room ID: <span id="gameRoomIDCreate"></span></div>
+				<button onclick="createGame()">Create Game</button>
+			</div>
+		</div>
+		<div class="playerListWrapper">
+			<h2>Players</h2>
+			<div class="playerList"></div>
+		</div>
+		<button id="startGameButton" onclick="startGame()" disabled>Start Game</button>
+	</body>
+	<script
+		src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+		integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+		crossorigin="anonymous"></script>
+	<script src="login.js"></script>
+</html>

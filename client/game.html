@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="main.css" />
+		<title>Yahtzee</title>
+	</head>
+	<body>
+		<div class="game">
+			<div class="playerTable">
+			</div>
+			<table class="scorecard">
+				<tbody>
+					<tr>
+						<td>
+							<div>
+								<span>
+									<img src="assets/dice_1.png" style="width: 2em" />
+									Ones
+								</span>
+								<div class="scoreBox"><span id="sb1"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>3 of a Kind</span>
+								<div class="scoreBox"><span id="sb3ok"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span
+									><img
+										src="assets/dice_2.png"
+										style="width: 2em" />
+									Twos</span
+								>
+								<div class="scoreBox"><span id="sb2"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>4 of a Kind</span>
+								<div class="scoreBox"><span id="sb4ok"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span
+									><img
+										src="assets/dice_3.png"
+										style="width: 2em" />
+									Threes</span
+								>
+								<div class="scoreBox"><span id="sb3"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>Full</span>
+								<div class="scoreBox"><span id="sbf"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span
+									><img
+										src="assets/dice_4.png"
+										style="width: 2em" />
+									Fours</span
+								>
+								<div class="scoreBox"><span id="sb4"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>Sm. Straight</span>
+								<div class="scoreBox"><span id="sbss"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span
+									><img
+										src="assets/dice_5.png"
+										style="width: 2em" />
+									Fives</span
+								>
+								<div class="scoreBox"><span id="sb5"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>Lg. Straight</span>
+								<div class="scoreBox"><span id="sbls"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span
+									><img
+										src="assets/dice_6.png"
+										style="width: 2em" />
+									Sixes</span
+								>
+								<div class="scoreBox"><span id="sb6"></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>5 of a Kind</span>
+								<div class="scoreBox"><span id="sb5ok"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span class="bonusText">
+									<span>BONUS</span>
+									<span>if upper is over 62</span>
+								</span>
+								<div id="bonus" class="scoreBox"><span></span></div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>Chance</span>
+								<div class="scoreBox"><span id="sbc"></span></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<span>UPPER</span>
+								<div class="scoreBox" id="upperTotal">0</div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>LOWER</span>
+								<div class="scoreBox" id="lowerTotal">0</div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div class="rollboard">
+				<div class="roll">
+					<div class="die" id="die1"></div>
+					<div class="die" id="die2"></div>
+					<div class="die" id="die3"></div>
+					<div class="die" id="die4"></div>
+					<div class="die" id="die5"></div>
+				</div>
+				<div class="buttons">
+					<button class="button" id="roll" onclick="roll()">
+						ROLL (<span id="rollsLeft">3</span>)
+					</button>
+					<button class="button" id="play" onclick="play()" disabled>PLAY</button>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script
+		src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+		integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+		crossorigin="anonymous"></script>
+	<script src="main.js"></script>
+</html>

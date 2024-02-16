@@ -1,0 +1,242 @@
+* {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.die {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transform: translateY(110%);
+    transition: .3s linear;
+}
+
+.die.locked {
+    opacity: .7;
+    cursor: pointer;
+}
+
+.lock {
+    display: block;
+    position: absolute;
+    width: 30px;
+    top: .5em;
+    right: .5em;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1c202d;
+    color: #dddddd;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    margin-top: 1em;
+}
+
+.game {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+}
+
+.scorecard {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+
+.scorecard td {
+    background-color: #2a3148;
+    padding: 8px;
+    text-align: center;
+    padding-left: 1em;
+    padding-right: 1em;
+    border: 1px solid #1c202d;
+    width: 50%;
+}
+
+.scorecard td:nth-child(1), .scorecard td:nth-child(2) {
+    padding-top: 1em;
+}
+
+.scorecard td>div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scorecard td>div>span {
+    display: flex;
+    align-items: center;
+}
+
+.scorecard td>div>span>img {
+    margin-right: .5em;
+}
+
+.scorecard .scoreBox:not(#bonus, #upperTotal, #lowerTotal) {
+    border-radius: .4em;
+    background-color: #ffffff22;
+    cursor: pointer;
+}
+
+.scorecard .scoreBox {
+    width: 2em;
+    aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.scorecard .scoreBox>span {
+    color: #afafaf;
+    font-size: 1.1em;
+}
+
+.scorecard .scoreBox.played>span, #bonus>span, #upperTotal, #lowerTotal{
+    color: lime;
+    font-size: 1.1em;
+}
+
+.scorecard .scoreBox.played {
+    cursor: default !important;
+}
+
+.scorecard .scoreBox.selected {
+    box-sizing: border-box;
+    border: 2px solid #e9c00b;
+}
+
+.rollboard {
+    width: calc(100% - 2em);
+    background-color: #2a3148;
+    border-radius: 1em;
+    margin-top: 1em;
+    padding: 1em;
+}
+
+.rollboard .roll, .rollboard .dice {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rollboard .roll>div {
+    width: 100px;
+    height: 100px;
+}
+
+.rollboard .roll {
+    overflow: hidden;
+}
+
+.rollboard .buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1em;
+}
+
+.rollboard .button {
+    width: 150px;
+    padding: .5em 1em;
+    border-radius: .5em;
+    cursor: pointer;
+    border: none;
+    color: #dddddd;
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+#roll {
+    background-color: #2b91ff;
+    margin-right: 1em;
+}
+
+.button:disabled {
+    opacity: .75;
+    cursor: not-allowed;
+}
+
+#play {
+    background-color: #3fc632;
+}
+
+.bonusText {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.bonusText span {
+    align-self: flex-start;
+}
+
+.bonusText span:last-child {
+    opacity: 0.5;
+}
+
+.playerTable {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    width: 100%;
+    margin: 1em 0;
+    background-color: #2a3148;
+    border-radius: 1rem;
+    padding: .5em 0;
+}
+
+.playerTable .playerCard {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    padding: .5em 1em;
+    border-right: #1c202d 1px solid;
+}
+
+.playerTable .playerCard:last-child {
+    border-right: none;
+}
+
+.playerTable .playerCard .playerScore {
+    color: lime;
+}
+
+/* media queries */
+@media (max-width: 550px) {
+    .game {
+        width: 90%;
+    }
+
+    .bonusText span:last-child {
+        font-size: .8em;
+    }
+
+    .roll {
+        height: 90px;
+    }
+
+    * {
+        white-space: nowrap;
+    }
+}
