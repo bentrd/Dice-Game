@@ -7,13 +7,14 @@ app.use(express.static("client"));
 serv.listen(2000);
 console.log("Server started.");
 
-var PLAYER_LIST = {};
+var PLAYER_LIST = [];
 var ROOMS = {};
 
 var Player = (username) => {
 	var self = {
 		username: username,
 		socketId: null,
+		sessionID: generateSessionID(),
 		scores: {
 			sb1: null,
 			sb2: null,
@@ -57,69 +58,69 @@ var io = require("socket.io")(serv, {});
 io.sockets.on("connection", function (socket) {
 	console.log("socket connection");
 
-	socket.on("gameStarted", function (room) {
-		for (let player of room) PLAYER_LIST[socket.id] = player;
-		console.log(PLAYER_LIST);
-	});
+	var currentPlayer;
+	var currentRoom;
 
 	socket.on("createGame", function (game) {
 		var player = Player(game.player.username);
 		player.socketId = game.player.socketID;
-		PLAYER_LIST[socket.id] = player;
-		ROOMS[game.roomID] = [player];
+		PLAYER_LIST.push(player);
+		ROOMS[game.roomID] = {
+			playerToPlay: 0,
+			players: [player],
+		};
 		console.log(ROOMS);
 		socket.emit(
 			"playerJoined",
-			ROOMS[game.roomID].map((v) => v.username)
+			ROOMS[game.roomID].players.map((v) => v.username)
 		);
 	});
 
 	socket.on("joinGame", function (game) {
 		var player = Player(game.player.username);
 		player.socketId = game.player.socketID;
-		PLAYER_LIST[socket.id] = player;
+		PLAYER_LIST.push(player);
 		if (!ROOMS[game.roomID]) return;
-		ROOMS[game.roomID].push(player);
-		console.log(ROOMS);
+		ROOMS[game.roomID].players.push(player);
+		//console.log(ROOMS);
 		io.emit(
 			"playerJoined",
-			ROOMS[game.roomID].map((v) => v.username)
+			ROOMS[game.roomID].players.map((v) => v.username)
 		);
 	});
 
 	socket.on("startGame", function (id) {
-		var room = Object.keys(ROOMS).find((key) => ROOMS[key].some((v) => v.socketId === id));
+		var room = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketId === id));
 		if (!room) return;
-		var players = ROOMS[room];
+		var players = ROOMS[room].players;
 		for (let player of players) {
-			io.to(player.socketId).emit(
-				"startGame",
-				players.map((v) => v.username),
-				players
-			);
+			io.to(player.socketId).emit("startGame", player.sessionID, ROOMS[room]);
 		}
 	});
 
 	socket.on("disconnect", function () {
 		console.log("socket disconnection");
 		for (let room in ROOMS) {
-			ROOMS[room] = ROOMS[room].filter((v) => v.socketId != socket.id);
-			if (ROOMS[room].length === 0) {
+			ROOMS[room].players = ROOMS[room].players.filter((v) => v.socketId != socket.id);
+			if (ROOMS[room].players.length === 0) {
 				delete ROOMS[room];
 				continue;
 			}
 			io.emit(
 				"playerJoined",
-				ROOMS[room].map((v) => v.username)
+				ROOMS[room].players.map((v) => v.username)
 			);
 		}
-		delete PLAYER_LIST[socket.id];
-		console.log(ROOMS);
+	});
+
+	socket.on("gameStarted", function (sessionID, room) {
+		currentPlayer = PLAYER_LIST.find((v) => v.sessionID === sessionID);
+		currentRoom = room;
 	});
 
 	socket.on("askDice", function (data) {
 		for (let die of data) if (die.locked == false) die.value = Math.floor(Math.random() * 6) + 1;
-		var player = PLAYER_LIST[socket.id];
+		var player = currentPlayer;
 		var values = data.map((v) => v.value);
 		var dice = data.map((v) => v.value);
 
@@ -140,7 +141,8 @@ io.sockets.on("connection", function (socket) {
 				: 0;
 		const set = Array.from(new Set(dice.sort())).join("");
 		player.scorecard["sbss"] = set.includes("1234") || set.includes("2345") || set.includes("3456") ? 30 : 0;
-		player.scorecard["sbls"] = dice.sort().join("").includes("12345") || dice.sort().join("").includes("23456") ? 40 : 0;
+		player.scorecard["sbls"] =
+			dice.sort().join("").includes("12345") || dice.sort().join("").includes("23456") ? 40 : 0;
 		player.scorecard["sb5ok"] = dice.every((v) => v === dice[0]) ? 50 : 0;
 
 		player.scorecard["sbc"] = dice.reduce((a, b) => a + b, 0);
@@ -150,11 +152,15 @@ io.sockets.on("connection", function (socket) {
 			player.scores.grandTotal += 100;
 			socket.emit("scores", player.scores);
 		}
-		socket.emit("roll", { dice: values, scoreboxes: player.scorecard });
+		io.emit("roll", { dice: values, scoreboxes: player.scorecard });
+	});
+
+	socket.on("lockDie", function (id) {
+		socket.broadcast.emit("lockDie", id);
 	});
 
 	socket.on("play", function (id) {
-		var player = PLAYER_LIST[socket.id];
+		var player = currentPlayer;
 		player.scores[id] = player.scorecard[id];
 		player.scorecard = {
 			sb1: null,
@@ -206,5 +212,6 @@ io.sockets.on("connection", function (socket) {
 	});
 });
 
-// TODO:
-// - Handle multiple players
+const generateSessionID = () => {
+	return Math.random().toString(36).substring(2, 15);
+};

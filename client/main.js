@@ -8,8 +8,9 @@ for (let i = 1; i <= 6; i++) {
 }
 
 const socket = io();
+const sessionID = localStorage.getItem("sessionID");
 
-socket.emit("gameStarted", JSON.parse(localStorage.getItem("room")));
+socket.emit("gameStarted", JSON.parse(localStorage.getItem("sessionID")), JSON.parse(localStorage.getItem("room")));
 
 const scoreBoxes = document.querySelectorAll(".scoreBox");
 for (let i = 0; i < scoreBoxes.length - 2; i++) {
@@ -33,15 +34,10 @@ lock.src = "assets/lock.svg";
 lock.width = 50;
 lock.classList.add("lock");
 
-const roll = () => {
+socket.on("roll", function (data) {
 	if (rollsLeft.textContent == 0) return;
-	var diceToAsk = [];
 	for (let i = 1; i <= 5; i++) {
 		var die = document.querySelector(`#die${i}`);
-		if (rollsLeft.textContent < 3) var dieFace = die.querySelector(".dice").src.split("_")[1].split(".")[0];
-		if (die.classList.contains("locked")) diceToAsk.push({ locked: true, value: parseInt(dieFace) });
-		else if (rollsLeft.textContent == 3) diceToAsk.push({ locked: false, value: "" });
-		else diceToAsk.push({ locked: false, value: parseInt(dieFace) });
 		if (die.classList.contains("locked")) continue;
 		die.addEventListener("click", lockDie);
 		die.style.cursor = "pointer";
@@ -49,13 +45,8 @@ const roll = () => {
 		die.style.transform += ` rotate(${Math.floor(180 + Math.random() * 180)}deg) `;
 	}
 
-	var diceFromServer;
-	var scoreboxesFromServer;
-	socket.emit("askDice", diceToAsk);
-	socket.on("roll", function (data) {
-		diceFromServer = data.dice;
-		scoreboxesFromServer = data.scoreboxes;
-	});
+	diceFromServer = data.dice;
+	scoreboxesFromServer = data.scoreboxes;
 
 	setTimeout(() => {
 		for (let i = 1; i <= 5; i++) {
@@ -78,11 +69,24 @@ const roll = () => {
 
 		updateScoreBoxes(scoreboxesFromServer);
 	}, 300);
+});
+
+const roll = () => {
+	var diceToAsk = [];
+	for (let i = 1; i <= 5; i++) {
+		var die = document.querySelector(`#die${i}`);
+		if (rollsLeft.textContent < 3) var dieFace = die.querySelector(".dice").src.split("_")[1].split(".")[0];
+		if (die.classList.contains("locked")) diceToAsk.push({ locked: true, value: parseInt(dieFace) });
+		else if (rollsLeft.textContent == 3) diceToAsk.push({ locked: false, value: "" });
+		else diceToAsk.push({ locked: false, value: parseInt(dieFace) });
+	}
+	socket.emit("askDice", diceToAsk, sessionID);
 };
 
 const lockDie = (e) => {
 	parent = e.target.parentElement;
 	if (!parent.classList.contains("die")) return;
+	socket.emit("lockDie", parent.id);
 	parent.classList.toggle("locked");
 	if (parent.classList.contains("locked")) {
 		parent.appendChild(lock.cloneNode());
@@ -90,9 +94,17 @@ const lockDie = (e) => {
 		parent.querySelector(".lock").remove();
 	}
 	const dice = document.querySelectorAll(".die");
-	if (document.querySelector("#rollsLeft").textContent == 0) return;
 	document.querySelector("#roll").disabled = document.querySelectorAll(".locked").length === dice.length;
 };
+
+socket.on("lockDie", function (id) {
+	const die = document.querySelector(`#${id}`);
+	die.classList.toggle("locked");
+	if (die.classList.contains("locked")) die.appendChild(lock.cloneNode());
+	else die.querySelector(".lock").remove();
+	const dice = document.querySelectorAll(".die");
+	document.querySelector("#roll").disabled = document.querySelectorAll(".locked").length === dice.length;
+});
 
 const updateScoreBoxes = (scoreboxes) => {
 	const boxes = document.querySelectorAll(".scoreBox");
@@ -142,8 +154,7 @@ const updateTotals = () => {
 		upper.innerHTML = data.upperTotal;
 		lower.innerHTML = data.lowerTotal;
 		total.innerHTML = data.grandTotal;
-		if (data.bonus != null)
-			bonus.firstChild.innerHTML = data.bonus;
+		if (data.bonus != null) bonus.firstChild.innerHTML = data.bonus;
 		for (let i = 0; i < boxes.length; i++)
 			if (data[boxes[i].firstChild.id] != null) boxes[i].firstChild.textContent = data[boxes[i].firstChild.id];
 		setTimeout(checkGameOver(data), 100);
@@ -162,9 +173,9 @@ const addPlayer = (username) => {
 	const playerTable = document.querySelector(".playerTable");
 	const playerCard = `<div class="playerCard"><span>${username}</span><span class="playerScore" id="${username}Total">0</span></div>`;
 	playerTable.innerHTML += playerCard;
-}
+};
 
 const room = JSON.parse(localStorage.getItem("room"));
-for (let player of room) {
-	addPlayer(player.username)
+for (let player of room.players) {
+	addPlayer(player.username);
 }

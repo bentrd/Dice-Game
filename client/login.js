@@ -66,21 +66,21 @@ const addToPlayerList = (username) => {
     playerList.appendChild(player);
 }
 
-socket.on("playerJoined", function (data) {
+socket.on("playerJoined", function (players) {
     const playerList = document.querySelector(".playerList");
     playerList.innerHTML = "";
-    document.getElementById("startGameButton").disabled = data.length < 2;
-    if (data.length === 0) return;
-    for (let player of data) {
+    document.getElementById("startGameButton").disabled = players.length < 2;
+    if (players.length === 0) return;
+    for (let player of players) {
         addToPlayerList(player);
     }
 });
 
-socket.on("startGame", function (self, room) {
+socket.on("startGame", function (sessionID, room) {
     console.log("game started");
     localStorage.removeItem("room");
-    localStorage.removeItem("self");
+    localStorage.removeItem("sessionID");
     localStorage.setItem("room", JSON.stringify(room));
-    localStorage.setItem("self", JSON.stringify(self));
+    localStorage.setItem("sessionID", JSON.stringify(sessionID));
     window.location.href = "/game.html";
 });
