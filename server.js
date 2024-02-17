@@ -13,7 +13,7 @@ var ROOMS = {};
 var Player = (username) => {
 	var self = {
 		username: username,
-		socketId: null,
+		socketID: null,
 		sessionID: generateSessionID(),
 		scores: {
 			sb1: null,
@@ -30,9 +30,9 @@ var Player = (username) => {
 			sb5ok: null,
 			sbc: null,
 			bonus: null,
-			upperTotal: null,
-			lowerTotal: null,
-			grandTotal: null,
+			upperTotal: 0,
+			lowerTotal: 0,
+			grandTotal: 0,
 		},
 		scorecard: {
 			sb1: null,
@@ -58,14 +58,14 @@ var io = require("socket.io")(serv, {});
 io.sockets.on("connection", function (socket) {
 	console.log("socket connection");
 
-	var currentPlayer;
 	var currentRoom;
 
 	socket.on("createGame", function (game) {
 		var player = Player(game.player.username);
-		player.socketId = game.player.socketID;
+		player.socketID = game.player.socketID;
 		PLAYER_LIST.push(player);
 		ROOMS[game.roomID] = {
+			roomID: game.roomID,
 			playerToPlay: 0,
 			players: [player],
 		};
@@ -78,7 +78,7 @@ io.sockets.on("connection", function (socket) {
 
 	socket.on("joinGame", function (game) {
 		var player = Player(game.player.username);
-		player.socketId = game.player.socketID;
+		player.socketID = game.player.socketID;
 		PLAYER_LIST.push(player);
 		if (!ROOMS[game.roomID]) return;
 		ROOMS[game.roomID].players.push(player);
@@ -90,18 +90,27 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	socket.on("startGame", function (id) {
-		var room = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketId === id));
+		var room = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketID === id));
 		if (!room) return;
 		var players = ROOMS[room].players;
 		for (let player of players) {
-			io.to(player.socketId).emit("startGame", player.sessionID, ROOMS[room]);
+			io.to(player.socketID).emit("startGame", player.sessionID, ROOMS[room]);
 		}
+	});
+
+	socket.on("joinRoom", function (sessionID, roomID) {
+		var room = ROOMS[roomID];
+		if (!room) return;
+		var player = room.players.find((v) => v.sessionID === sessionID);
+		if (!player) return;
+		socket.join(roomID);
+		currentRoom = room;
 	});
 
 	socket.on("disconnect", function () {
 		console.log("socket disconnection");
-		for (let room in ROOMS) {
-			ROOMS[room].players = ROOMS[room].players.filter((v) => v.socketId != socket.id);
+		/*for (let room in ROOMS) {
+			ROOMS[room].players = ROOMS[room].players.filter((v) => v.socketID != socket.id);
 			if (ROOMS[room].players.length === 0) {
 				delete ROOMS[room];
 				continue;
@@ -110,17 +119,12 @@ io.sockets.on("connection", function (socket) {
 				"playerJoined",
 				ROOMS[room].players.map((v) => v.username)
 			);
-		}
-	});
-
-	socket.on("gameStarted", function (sessionID, room) {
-		currentPlayer = PLAYER_LIST.find((v) => v.sessionID === sessionID);
-		currentRoom = room;
+		}*/
 	});
 
 	socket.on("askDice", function (data) {
 		for (let die of data) if (die.locked == false) die.value = Math.floor(Math.random() * 6) + 1;
-		var player = currentPlayer;
+		var player = currentRoom.players[currentRoom.playerToPlay];
 		var values = data.map((v) => v.value);
 		var dice = data.map((v) => v.value);
 
@@ -160,7 +164,7 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	socket.on("play", function (id) {
-		var player = currentPlayer;
+		var player = currentRoom.players[currentRoom.playerToPlay];
 		player.scores[id] = player.scorecard[id];
 		player.scorecard = {
 			sb1: null,
@@ -208,7 +212,10 @@ io.sockets.on("connection", function (socket) {
 		player.scores.lowerTotal = lowerTotal;
 		player.scores.grandTotal = upperTotal + lowerTotal;
 
-		socket.emit("scores", player.scores);
+		currentRoom.playerToPlay = (currentRoom.playerToPlay + 1) % currentRoom.players.length;
+
+		io.emit("play", id);
+		io.emit("scores", currentRoom);
 	});
 });
 

@@ -87,7 +87,7 @@ body {
     margin-right: .5em;
 }
 
-.scorecard .scoreBox:not(#bonus, #upperTotal, #lowerTotal) {
+.scorecard .scoreBox:not(:has(#bonus, #upperTotal, #lowerTotal)) {
     border-radius: .4em;
     background-color: #ffffff22;
     cursor: pointer;
@@ -107,7 +107,7 @@ body {
     font-size: 1.1em;
 }
 
-.scorecard .scoreBox.played>span, #bonus>span, #upperTotal, #lowerTotal{
+.scorecard .scoreBox.played>span, #bonus, #upperTotal, #lowerTotal{
     color: lime;
     font-size: 1.1em;
 }

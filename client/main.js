@@ -7,10 +7,26 @@ for (let i = 1; i <= 6; i++) {
 	dice.push(image);
 }
 
-const socket = io();
-const sessionID = localStorage.getItem("sessionID");
+const mod = (n, m) => ((n % m) + m) % m;
 
-socket.emit("gameStarted", JSON.parse(localStorage.getItem("sessionID")), JSON.parse(localStorage.getItem("room")));
+const socket = io();
+const sessionID = JSON.parse(localStorage.getItem("sessionID"));
+var room = JSON.parse(localStorage.getItem("room"));
+
+socket.emit("joinRoom", sessionID, room.roomID);
+
+function passTurn() {
+	const room = JSON.parse(localStorage.getItem("room"));
+	const player = room.players[room.playerToPlay];
+	if (player.sessionID == sessionID) {
+		document.querySelector("#roll").style.display = "block";
+		document.querySelector("#play").style.display = "block";
+	} else {
+		document.querySelector("#roll").style.display = "none";
+		document.querySelector("#play").style.display = "none";
+	}
+}
+passTurn();
 
 const scoreBoxes = document.querySelectorAll(".scoreBox");
 for (let i = 0; i < scoreBoxes.length - 2; i++) {
@@ -108,13 +124,6 @@ socket.on("lockDie", function (id) {
 
 const updateScoreBoxes = (scoreboxes) => {
 	const boxes = document.querySelectorAll(".scoreBox");
-	if (document.querySelectorAll(".dice").length === 0) {
-		for (let i = 0; i < boxes.length - 2; i++) {
-			if (boxes[i].classList.contains("played")) continue;
-			boxes[i].firstChild.textContent = "";
-		}
-		return;
-	}
 	for (let i = 0; i < boxes.length - 2; i++) {
 		if (boxes[i].classList.contains("played") || boxes[i].id == "bonus") continue;
 		boxes[i].firstChild.textContent = scoreboxes[boxes[i].firstChild.id];
@@ -126,8 +135,10 @@ const play = () => {
 	const scoreSpan = selected.firstChild;
 
 	socket.emit("play", scoreSpan.id);
+};
 
-	selected.classList.add("played");
+socket.on("play", (id) => {
+	const selected = document.querySelector("#" + id).parentElement;
 	selected.classList.remove("selected");
 	document.querySelector("#play").disabled = true;
 	document.querySelector("#roll").disabled = false;
@@ -139,27 +150,20 @@ const play = () => {
 		dice[i].removeEventListener("click", lockDie);
 		dice[i].style.cursor = "default";
 	}
+});
 
-	updateTotals();
-	updateScoreBoxes();
-};
-
-const updateTotals = () => {
-	const boxes = document.querySelectorAll(".scoreBox:not(#bonus):not(#upperTotal):not(#lowerTotal)");
-	const upper = document.querySelector("#upperTotal");
-	const lower = document.querySelector("#lowerTotal");
-	const total = document.querySelector("#p1Total");
-	const bonus = document.querySelector("#bonus");
-	socket.on("scores", function (data) {
-		upper.innerHTML = data.upperTotal;
-		lower.innerHTML = data.lowerTotal;
-		total.innerHTML = data.grandTotal;
-		if (data.bonus != null) bonus.firstChild.innerHTML = data.bonus;
-		for (let i = 0; i < boxes.length; i++)
-			if (data[boxes[i].firstChild.id] != null) boxes[i].firstChild.textContent = data[boxes[i].firstChild.id];
-		setTimeout(checkGameOver(data), 100);
-	});
-};
+socket.on("scores", (room) => {
+	localStorage.removeItem("room");
+	localStorage.setItem("room", JSON.stringify(room));
+	room = JSON.parse(localStorage.getItem("room"));
+	const playerWhoPlayed = mod(room.playerToPlay - 1, room.players.length);
+	const playerToPlay = room.playerToPlay;
+	loadScorecard(room.players[playerWhoPlayed]);
+	setTimeout(() => {
+		loadScorecard(room.players[playerToPlay]);
+		passTurn();
+	}, 500);
+});
 
 const checkGameOver = (data) => {
 	for (let score in data) {
@@ -175,7 +179,20 @@ const addPlayer = (username) => {
 	playerTable.innerHTML += playerCard;
 };
 
-const room = JSON.parse(localStorage.getItem("room"));
-for (let player of room.players) {
-	addPlayer(player.username);
-}
+for (let player of room.players) addPlayer(player.username);
+
+const loadScorecard = (player) => {
+	const scorecard = player.scores;
+	const boxes = document.querySelectorAll(".scoreBox");
+	for (let i = 0; i < boxes.length; i++)
+		if (scorecard[boxes[i].firstChild.id] != null) {
+			boxes[i].firstChild.textContent = scorecard[boxes[i].firstChild.id];
+			boxes[i].classList.add("played");
+		} else {
+			boxes[i].firstChild.textContent = "";
+			boxes[i].classList.remove("played");
+		}
+	document.querySelector(`#${player.username}Total`).textContent = player.scores.grandTotal;
+};
+
+for (let player of room.players) loadScorecard(player);
