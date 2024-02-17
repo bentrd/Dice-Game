@@ -9,6 +9,8 @@ for (let i = 1; i <= 6; i++) {
 
 const mod = (n, m) => ((n % m) + m) % m;
 
+var myTurn = false;
+
 const socket = io();
 const sessionID = JSON.parse(localStorage.getItem("sessionID"));
 var room = JSON.parse(localStorage.getItem("room"));
@@ -21,9 +23,11 @@ function passTurn() {
 	if (player.sessionID == sessionID) {
 		document.querySelector("#roll").style.display = "block";
 		document.querySelector("#play").style.display = "block";
+		myTurn = true;
 	} else {
 		document.querySelector("#roll").style.display = "none";
 		document.querySelector("#play").style.display = "none";
+		myTurn = false;
 	}
 }
 passTurn();
@@ -100,6 +104,7 @@ const roll = () => {
 };
 
 const lockDie = (e) => {
+	if (!myTurn) return;
 	parent = e.target.parentElement;
 	if (!parent.classList.contains("die")) return;
 	socket.emit("lockDie", parent.id);
