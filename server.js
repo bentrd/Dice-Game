@@ -216,8 +216,16 @@ io.sockets.on("connection", function (socket) {
 
 		io.emit("play", id);
 		io.emit("scores", currentRoom);
+		if (checkGameOver(currentRoom)) {
+			const winner = currentRoom.players.reduce((a, b) => (a.scores.grandTotal > b.scores.grandTotal ? a : b));
+			io.emit("gameOver", winner.username);
+			PLAYER_LIST = PLAYER_LIST.filter((v) => v.roomID != currentRoom.roomID);
+			delete ROOMS[currentRoom.roomID];
+		}
 	});
 });
+
+const checkGameOver = (room) => room.players.every((v) => Object.values(v.scores).every((v) => v != null));;
 
 const generateSessionID = () => {
 	return Math.random().toString(36).substring(2, 15);

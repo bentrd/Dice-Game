@@ -14,6 +14,11 @@
 .playerListWrapper {
     display: none;
     flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff09;
+    width: 250px;
+    border-radius: 0 0 1em 1em;
 }
 
 .playerList {
@@ -30,4 +35,62 @@
 
 #startGameButton {
     display: none;
+    font-size: 1em;
+}
+
+#login {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+    background-color: #ffffff11;
+    width: 500px;
+    padding: 1em;
+    border-radius: 1em;
+}
+
+button {
+    margin: 1em;
+    font-size: 1.5em;
+    padding: .5em;
+    border-radius: 1em;
+    border: #00000022;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .75;
+    cursor: not-allowed;
+}
+
+input {
+    margin: 1em;
+    font-size: 1.5em;
+    padding: .5em;
+    border-radius: 1em;
+    border: #00000022;
+}
+
+#gameRoomIDCreate {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: white;
+}
+
+#createGamePanel {
+    display: none;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+#createGamePanel div {
+    text-align: center;
+}
+
+@media (max-width: 550px) {
+    #login {
+        width: 90%;
+    }
 }
