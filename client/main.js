@@ -166,8 +166,8 @@ socket.on("scores", (room) => {
 	loadScorecard(room.players[playerWhoPlayed]);
 	setTimeout(() => {
 		loadScorecard(room.players[playerToPlay]);
-		passTurn();
 	}, 500);
+	passTurn();
 });
 
 const checkGameOver = (data) => {
