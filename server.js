@@ -70,6 +70,7 @@ io.sockets.on("connection", function (socket) {
 			players: [player],
 		};
 		console.log(ROOMS);
+		socket.join(game.roomID);
 		socket.emit(
 			"playerJoined",
 			ROOMS[game.roomID].players.map((v) => v.username)
@@ -83,7 +84,8 @@ io.sockets.on("connection", function (socket) {
 		if (!ROOMS[game.roomID]) return;
 		ROOMS[game.roomID].players.push(player);
 		//console.log(ROOMS);
-		io.emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
+		socket.join(game.roomID);
+		io.to(game.roomID).emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
 	});
 
 	socket.on("startGame", function (id) {
@@ -156,7 +158,11 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	socket.on("lockDie", function (id) {
-		io.to(currentRoom.roomID).emit("lockDie", id);
+		const players = currentRoom.players;
+		for (let player of players) {
+			if (player.socketID == socket.id) continue;
+			io.to(player.socketID).emit("lockDie", id);
+		}
 	});
 
 	socket.on("play", function (id) {
