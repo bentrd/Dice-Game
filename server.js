@@ -83,19 +83,15 @@ io.sockets.on("connection", function (socket) {
 		if (!ROOMS[game.roomID]) return;
 		ROOMS[game.roomID].players.push(player);
 		//console.log(ROOMS);
-		io.emit(
-			"playerJoined",
-			ROOMS[game.roomID].players.map((v) => v.username)
-		);
+		io.to(game.room).emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
 	});
 
 	socket.on("startGame", function (id) {
 		var room = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketID === id));
 		if (!room) return;
 		var players = ROOMS[room].players;
-		for (let player of players) {
+		for (let player of players)
 			io.to(player.socketID).emit("startGame", player.sessionID, ROOMS[room]);
-		}
 	});
 
 	socket.on("joinRoom", function (sessionID, roomID) {
@@ -156,11 +152,11 @@ io.sockets.on("connection", function (socket) {
 			player.scores.grandTotal += 100;
 			socket.emit("scores", player.scores);
 		}
-		io.emit("roll", { dice: values, scoreboxes: player.scorecard });
+		io.to(currentRoom.roomID).emit("roll", { dice: values, scoreboxes: player.scorecard });
 	});
 
 	socket.on("lockDie", function (id) {
-		socket.broadcast.emit("lockDie", id);
+		io.to(currentRoom.roomID).emit("lockDie", id);
 	});
 
 	socket.on("play", function (id) {
@@ -214,11 +210,11 @@ io.sockets.on("connection", function (socket) {
 
 		currentRoom.playerToPlay = (currentRoom.playerToPlay + 1) % currentRoom.players.length;
 
-		io.emit("play", id);
-		io.emit("scores", currentRoom);
+		io.to(currentRoom.roomID).emit("play", id);
+		io.to(currentRoom.roomID).emit("scores", currentRoom);
 		if (checkGameOver(currentRoom)) {
 			const winner = currentRoom.players.reduce((a, b) => (a.scores.grandTotal > b.scores.grandTotal ? a : b));
-			io.emit("gameOver", winner.username);
+			io.to(currentRoom.roomID).emit("gameOver", winner.username);
 			PLAYER_LIST = PLAYER_LIST.filter((v) => v.roomID != currentRoom.roomID);
 			delete ROOMS[currentRoom.roomID];
 		}
