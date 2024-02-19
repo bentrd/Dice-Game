@@ -83,7 +83,7 @@ io.sockets.on("connection", function (socket) {
 		if (!ROOMS[game.roomID]) return;
 		ROOMS[game.roomID].players.push(player);
 		//console.log(ROOMS);
-		io.to(game.room).emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
+		io.to(game.roomID).emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
 	});
 
 	socket.on("startGame", function (id) {
