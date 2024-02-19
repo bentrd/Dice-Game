@@ -45,7 +45,7 @@ const joinGame = () => {
     const gameRoomID = document.getElementById("gameRoomIDJoin");
     const username = document.getElementById("usernameJoin");
     const game = {
-        roomID: gameRoomID.value,
+        roomID: gameRoomID.value.toUpperCase(),
         player: {
             username: username.value,
             socketID: socket.id
