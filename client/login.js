@@ -13,7 +13,7 @@ const createGamePanel = () => {
     startGameButton.style.display = "flex";
 
     const gameRoomID = document.getElementById("gameRoomIDCreate");
-    const roomID = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const roomID = Math.random().toString(36).substring(2, 5).toUpperCase();
     gameRoomID.textContent = roomID;
 }
 
