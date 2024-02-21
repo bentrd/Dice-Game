@@ -78,22 +78,26 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	socket.on("joinGame", function (game) {
+		if (!ROOMS[game.roomID] || ROOMS[game.roomID].isPlaying) return;
 		var player = Player(game.player.username);
+		if (ROOMS[game.roomID].players.some((v) => v.username === player.username)) return;
 		player.socketID = game.player.socketID;
 		PLAYER_LIST.push(player);
-		if (!ROOMS[game.roomID]) return;
 		ROOMS[game.roomID].players.push(player);
 		//console.log(ROOMS);
 		socket.join(game.roomID);
-		io.to(game.roomID).emit("playerJoined", ROOMS[game.roomID].players.map((v) => v.username));
+		io.to(game.roomID).emit(
+			"playerJoined",
+			ROOMS[game.roomID].players.map((v) => v.username)
+		);
 	});
 
 	socket.on("startGame", function (id) {
-		var room = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketID === id));
-		if (!room) return;
-		var players = ROOMS[room].players;
-		for (let player of players)
-			io.to(player.socketID).emit("startGame", player.sessionID, ROOMS[room]);
+		var roomID = Object.keys(ROOMS).find((key) => ROOMS[key].players.some((v) => v.socketID === id));
+		if (!roomID) return;
+		var players = ROOMS[roomID].players;
+		ROOMS[roomID].isPlaying = true;
+		for (let player of players) io.to(player.socketID).emit("startGame", player.sessionID, ROOMS[roomID]);
 	});
 
 	socket.on("joinRoom", function (sessionID, roomID) {
@@ -101,6 +105,7 @@ io.sockets.on("connection", function (socket) {
 		if (!room) return;
 		var player = room.players.find((v) => v.sessionID === sessionID);
 		if (!player) return;
+		player.socketID = socket.id;
 		socket.join(roomID);
 		currentRoom = room;
 	});
@@ -143,12 +148,11 @@ io.sockets.on("connection", function (socket) {
 				: 0;
 		const set = Array.from(new Set(dice.sort())).join("");
 		player.scorecard["sbss"] = set.includes("1234") || set.includes("2345") || set.includes("3456") ? 30 : 0;
-		player.scorecard["sbls"] =
-			dice.sort().join("").includes("12345") || dice.sort().join("").includes("23456") ? 40 : 0;
+		player.scorecard["sbls"] = dice.sort().join("").includes("12345") || dice.sort().join("").includes("23456") ? 40 : 0;
 		player.scorecard["sb5ok"] = dice.every((v) => v === dice[0]) ? 50 : 0;
 
 		player.scorecard["sbc"] = dice.reduce((a, b) => a + b, 0);
-		if (player.scorecard.sb5ok != 0 && player.scores.sb5ok != null) {
+		if (player.scores.sb5ok != 0 && player.scores.sb5ok != null) {
 			player.scores.sb5ok += 100;
 			player.scores.lowerTotal += 100;
 			player.scores.grandTotal += 100;
@@ -227,7 +231,7 @@ io.sockets.on("connection", function (socket) {
 	});
 });
 
-const checkGameOver = (room) => room.players.every((v) => Object.values(v.scores).every((v) => v != null));;
+const checkGameOver = (room) => room.players.every((v) => Object.values(v.scores).every((v) => v != null));
 
 const generateSessionID = () => {
 	return Math.random().toString(36).substring(2, 15);

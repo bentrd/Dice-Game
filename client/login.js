@@ -30,6 +30,7 @@ const joinGamePanel = () => {
 const createGame = () => {
     const gameRoomID = document.getElementById("gameRoomIDCreate");
     const username = document.getElementById("usernameCreate");
+    if (username.value === "") return;
     const game = {
         roomID: gameRoomID.textContent,
         player: {
@@ -44,6 +45,7 @@ const createGame = () => {
 const joinGame = () => {
     const gameRoomID = document.getElementById("gameRoomIDJoin");
     const username = document.getElementById("usernameJoin");
+    if (username.value === "") return;
     const game = {
         roomID: gameRoomID.value.toUpperCase(),
         player: {

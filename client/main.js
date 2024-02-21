@@ -109,11 +109,8 @@ const lockDie = (e) => {
 	if (!parent.classList.contains("die")) return;
 	socket.emit("lockDie", parent.id);
 	parent.classList.toggle("locked");
-	if (parent.classList.contains("locked")) {
-		parent.appendChild(lock.cloneNode());
-	} else {
-		parent.querySelector(".lock").remove();
-	}
+	if (parent.classList.contains("locked")) parent.appendChild(lock.cloneNode());
+	else parent.querySelector(".lock").remove();
 	const dice = document.querySelectorAll(".die");
 	document.querySelector("#roll").disabled = document.querySelectorAll(".locked").length === dice.length;
 };
