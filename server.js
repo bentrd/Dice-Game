@@ -152,7 +152,7 @@ io.sockets.on("connection", function (socket) {
 		player.scorecard["sb5ok"] = dice.every((v) => v === dice[0]) ? 50 : 0;
 
 		player.scorecard["sbc"] = dice.reduce((a, b) => a + b, 0);
-		if (player.scores.sb5ok != 0 && player.scores.sb5ok != null) {
+		if (player.scores.sb5ok >= 50 && player.scorecard.sb5ok == 50) {
 			player.scores.sb5ok += 100;
 			player.scores.lowerTotal += 100;
 			player.scores.grandTotal += 100;
