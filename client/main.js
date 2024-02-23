@@ -201,6 +201,8 @@ for (let player of room.players) loadScorecard(player);
 
 socket.on("gameOver", (winner) => {
 	loadScorecard(winner);
-	alert(`${winner.username} wins!`);
-	window.location.href = "/";
+	setTimeout(() => {
+		alert(`${winner.username} wins!`);
+		window.location.href = "/";
+	}, 100);
 });

@@ -222,6 +222,4 @@ io.sockets.on("connection", function (socket) {
 
 const checkGameOver = (room) => room.players.every((v) => Object.values(v.scores).every((v) => v != null));
 
-const generateSessionID = () => {
-	return Math.random().toString(36).substring(2, 15);
-};
+const generateSessionID = () => Math.random().toString(36).substring(2, 15);
