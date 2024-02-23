@@ -91,6 +91,6 @@ input {
 
 @media (max-width: 550px) {
     #login {
-        width: 90%;
+        width: 80%;
     }
 }
