@@ -112,17 +112,6 @@ io.sockets.on("connection", function (socket) {
 
 	socket.on("disconnect", function () {
 		console.log("socket disconnection");
-		/*for (let room in ROOMS) {
-			ROOMS[room].players = ROOMS[room].players.filter((v) => v.socketID != socket.id);
-			if (ROOMS[room].players.length === 0) {
-				delete ROOMS[room];
-				continue;
-			}
-			io.emit(
-				"playerJoined",
-				ROOMS[room].players.map((v) => v.username)
-			);
-		}*/
 	});
 
 	socket.on("askDice", function (data) {
