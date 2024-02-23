@@ -213,7 +213,7 @@ io.sockets.on("connection", function (socket) {
 		io.to(currentRoom.roomID).emit("scores", currentRoom);
 		if (checkGameOver(currentRoom)) {
 			const winner = currentRoom.players.reduce((a, b) => (a.scores.grandTotal > b.scores.grandTotal ? a : b));
-			io.to(currentRoom.roomID).emit("gameOver", winner.username);
+			io.to(currentRoom.roomID).emit("gameOver", winner);
 			PLAYER_LIST = PLAYER_LIST.filter((v) => v.roomID != currentRoom.roomID);
 			delete ROOMS[currentRoom.roomID];
 		}

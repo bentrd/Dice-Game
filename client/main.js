@@ -200,6 +200,7 @@ const loadScorecard = (player) => {
 for (let player of room.players) loadScorecard(player);
 
 socket.on("gameOver", (winner) => {
-	alert(`Game Over! ${winner} wins!`);
+	loadScorecard(winner);
+	alert(`${winner.username} wins!`);
 	window.location.href = "/";
 });
