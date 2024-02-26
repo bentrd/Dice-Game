@@ -171,7 +171,6 @@ body {
 }
 
 .button:disabled {
-    opacity: .75;
     cursor: not-allowed;
 }
 
@@ -212,6 +211,13 @@ body {
     align-items: center;
     padding: .5em 1em;
     border-right: #1c202d 1px solid;
+    width: 0;
+}
+
+.playerTable .playerCard span:first-child {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 80%;
 }
 
 .playerTable .playerCard:last-child {

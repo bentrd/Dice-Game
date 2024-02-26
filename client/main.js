@@ -17,7 +17,7 @@ var room = JSON.parse(localStorage.getItem("room"));
 
 socket.emit("joinRoom", sessionID, room.roomID);
 
-function passTurn() {
+const passTurn = () => {
 	const room = JSON.parse(localStorage.getItem("room"));
 	const player = room.players[room.playerToPlay];
 	if (player.sessionID == sessionID) {
@@ -158,12 +158,8 @@ socket.on("scores", (room) => {
 	localStorage.removeItem("room");
 	localStorage.setItem("room", JSON.stringify(room));
 	room = JSON.parse(localStorage.getItem("room"));
-	const playerWhoPlayed = mod(room.playerToPlay - 1, room.players.length);
 	const playerToPlay = room.playerToPlay;
-	loadScorecard(room.players[playerWhoPlayed]);
-	setTimeout(() => {
-		loadScorecard(room.players[playerToPlay]);
-	}, 500);
+	loadScorecard(room.players[playerToPlay]);
 	passTurn();
 });
 

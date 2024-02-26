@@ -77,14 +77,13 @@ io.sockets.on("connection", function (socket) {
 		);
 	});
 
-	socket.on("joinGame", function (game) {
-		if (!ROOMS[game.roomID] || ROOMS[game.roomID].isPlaying) return;
+	socket.on("joinGame", (game, cb) => {
+		if (!ROOMS[game.roomID] || ROOMS[game.roomID].isPlaying) return cb("Room not found or game already started.");
 		var player = Player(game.player.username);
-		if (ROOMS[game.roomID].players.some((v) => v.username === player.username)) return;
+		if (ROOMS[game.roomID].players.some((v) => v.username === player.username)) return cb("Username already taken.");
 		player.socketID = game.player.socketID;
 		PLAYER_LIST.push(player);
 		ROOMS[game.roomID].players.push(player);
-		//console.log(ROOMS);
 		socket.join(game.roomID);
 		io.to(game.roomID).emit(
 			"playerJoined",
