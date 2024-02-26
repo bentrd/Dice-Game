@@ -158,7 +158,9 @@ socket.on("scores", (room) => {
 	localStorage.removeItem("room");
 	localStorage.setItem("room", JSON.stringify(room));
 	room = JSON.parse(localStorage.getItem("room"));
+	const playerWhoPlayed = mod(room.playerToPlay - 1, room.players.length);
 	const playerToPlay = room.playerToPlay;
+	loadScorecard(room.players[playerWhoPlayed]);
 	loadScorecard(room.players[playerToPlay]);
 	passTurn();
 });
