@@ -18,9 +18,7 @@ var room = JSON.parse(localStorage.getItem("room"));
 socket.emit("joinRoom", sessionID, room.roomID);
 
 const passTurn = () => {
-	const room = JSON.parse(localStorage.getItem("room"));
-	const player = room.players[room.playerToPlay];
-	if (player.sessionID == sessionID) {
+	if (room.playerToPlay.sessionID == sessionID || room.playerToPlay.socketID == socket.id) {
 		document.querySelector("#roll").style.display = "block";
 		document.querySelector("#play").style.display = "block";
 		myTurn = true;
@@ -137,6 +135,8 @@ const play = () => {
 	const scoreSpan = selected.firstChild;
 
 	socket.emit("play", scoreSpan.id);
+
+	console.log(sessionID, room.playerToPlay.sessionID);
 };
 
 socket.on("play", (id) => {
@@ -154,15 +154,19 @@ socket.on("play", (id) => {
 	}
 });
 
-socket.on("scores", (room) => {
+socket.on("scores", (newRoom, playerWhoPlayed, playerToPlay) => {
 	localStorage.removeItem("room");
-	localStorage.setItem("room", JSON.stringify(room));
+	localStorage.setItem("room", JSON.stringify(newRoom));
 	room = JSON.parse(localStorage.getItem("room"));
-	const playerWhoPlayed = mod(room.playerToPlay - 1, room.players.length);
-	const playerToPlay = room.playerToPlay;
-	loadScorecard(room.players[playerWhoPlayed]);
-	loadScorecard(room.players[playerToPlay]);
-	passTurn();
+	console.log(room);
+	console.log(newRoom);
+	console.log(room.playerToPlay);
+	console.log(playerWhoPlayed, playerToPlay);
+	loadScorecard(playerWhoPlayed);
+	setTimeout(() => {
+		loadScorecard(playerToPlay);
+		passTurn();
+	}, 300);
 });
 
 const checkGameOver = (data) => {

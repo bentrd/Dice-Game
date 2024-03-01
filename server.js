@@ -2,6 +2,8 @@ var express = require("express");
 var app = express();
 var serv = require("http").Server(app);
 
+const mod = (n, m) => ((n % m) + m) % m;
+
 app.use(express.static("client"));
 
 serv.listen(2000);
@@ -66,7 +68,7 @@ io.sockets.on("connection", function (socket) {
 		PLAYER_LIST.push(player);
 		ROOMS[game.roomID] = {
 			roomID: game.roomID,
-			playerToPlay: 0,
+			playerToPlay: player,
 			players: [player],
 		};
 		console.log(ROOMS);
@@ -115,7 +117,7 @@ io.sockets.on("connection", function (socket) {
 
 	socket.on("askDice", function (data) {
 		for (let die of data) if (die.locked == false) die.value = Math.floor(Math.random() * 6) + 1;
-		var player = currentRoom.players[currentRoom.playerToPlay];
+		var player = currentRoom.players.find((v) => v.sessionID == currentRoom.playerToPlay.sessionID);
 		var values = data.map((v) => v.value);
 		var dice = data.map((v) => v.value);
 
@@ -158,7 +160,7 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	socket.on("play", function (id) {
-		var player = currentRoom.players[currentRoom.playerToPlay];
+		const player = currentRoom.players.find((v) => v.sessionID == currentRoom.playerToPlay.sessionID);
 		player.scores[id] = player.scorecard[id];
 		player.scorecard = {
 			sb1: null,
@@ -206,10 +208,10 @@ io.sockets.on("connection", function (socket) {
 		player.scores.lowerTotal = lowerTotal;
 		player.scores.grandTotal = upperTotal + lowerTotal;
 
-		currentRoom.playerToPlay = (currentRoom.playerToPlay + 1) % currentRoom.players.length;
+		currentRoom.playerToPlay = currentRoom.players[mod(currentRoom.players.indexOf(player) + 1, currentRoom.players.length)];
 
 		io.to(currentRoom.roomID).emit("play", id);
-		io.to(currentRoom.roomID).emit("scores", currentRoom);
+		io.to(currentRoom.roomID).emit("scores", currentRoom, player, currentRoom.playerToPlay);
 		if (checkGameOver(currentRoom)) {
 			const winner = currentRoom.players.reduce((a, b) => (a.scores.grandTotal > b.scores.grandTotal ? a : b));
 			io.to(currentRoom.roomID).emit("gameOver", winner);
