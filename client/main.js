@@ -53,6 +53,7 @@ lock.width = 50;
 lock.classList.add("lock");
 
 socket.on("roll", function (data) {
+	showScorecard(room.playerToPlay.username);
 	if (rollsLeft.textContent == 0) return;
 	for (let i = 1; i <= 5; i++) {
 		var die = document.querySelector(`#die${i}`);
@@ -64,7 +65,9 @@ socket.on("roll", function (data) {
 	}
 
 	diceFromServer = data.dice;
-	scoreboxesFromServer = data.scoreboxes;
+	room = JSON.parse(localStorage.getItem("room"));
+	room.playerToPlay.scorecard = data.scoreboxes;
+	localStorage.setItem("room", JSON.stringify(room));
 
 	setTimeout(() => {
 		for (let i = 1; i <= 5; i++) {
@@ -85,7 +88,7 @@ socket.on("roll", function (data) {
 			document.querySelector("#roll").disabled = false;
 		}
 
-		updateScoreBoxes(scoreboxesFromServer);
+		updateScoreBoxes(data.scoreboxes);
 	}, 300);
 });
 
@@ -177,13 +180,19 @@ const checkGameOver = (data) => {
 	document.querySelector("#play").disabled = true;
 };
 
-const addPlayer = (username) => {
+const showScorecard = (username) => {
+	const player = room.players.find((v) => v.username === username);
+	loadScorecard(player);
+	if (player.sessionID === room.playerToPlay.sessionID) updateScoreBoxes(room.playerToPlay.scorecard);
+}
+
+const addPlayer = (player) => {
 	const playerTable = document.querySelector(".playerTable");
-	const playerCard = `<div class="playerCard"><span>${username}</span><span class="playerScore" id="${username}Total">0</span></div>`;
+	const playerCard = `<div class="playerCard" id="${player.username}Card" onclick="showScorecard('${player.username}')"><span>${player.username}</span><span class="playerScore" id="${player.username}Total">0</span></div>`;
 	playerTable.innerHTML += playerCard;
 };
 
-for (let player of room.players) addPlayer(player.username);
+for (let player of room.players) addPlayer(player);
 
 const loadScorecard = (player) => {
 	const scorecard = player.scores;
@@ -197,9 +206,12 @@ const loadScorecard = (player) => {
 			boxes[i].classList.remove("played");
 		}
 	document.querySelector(`#${player.username}Total`).textContent = player.scores.grandTotal;
+	document.querySelectorAll(".playerCard").forEach((card) => card.classList.remove("active"));
+	document.querySelector(`#${player.username}Card`).classList.add("active");
 };
 
 for (let player of room.players) loadScorecard(player);
+loadScorecard(room.playerToPlay);
 
 socket.on("gameOver", (winner) => {
 	loadScorecard(winner);

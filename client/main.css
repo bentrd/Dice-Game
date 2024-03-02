@@ -171,6 +171,7 @@ body {
 }
 
 .button:disabled {
+    opacity: 0.60;
     cursor: not-allowed;
 }
 
@@ -200,7 +201,7 @@ body {
     margin: 1em 0;
     background-color: #2a3148;
     border-radius: 1rem;
-    padding: .5em 0;
+    overflow: hidden;
 }
 
 .playerTable .playerCard {
@@ -209,9 +210,15 @@ body {
     flex: 1;
     justify-content: space-between;
     align-items: center;
-    padding: .5em 1em;
+    padding: 1em;
     border-right: #1c202d 1px solid;
     width: 0;
+    cursor: pointer;
+}
+
+.playerTable .playerCard.active {
+    background-color: #FFFFFF22;
+    cursor: default;
 }
 
 .playerTable .playerCard span:first-child {
