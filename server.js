@@ -101,11 +101,11 @@ io.sockets.on("connection", function (socket) {
 		for (let player of players) io.to(player.socketID).emit("startGame", player.sessionID, ROOMS[roomID]);
 	});
 
-	socket.on("joinRoom", function (sessionID, roomID) {
+	socket.on("joinRoom", function (sessionID, roomID, cb) {
 		var room = ROOMS[roomID];
-		if (!room) return;
+		if (!room) return cb();
 		var player = room.players.find((v) => v.sessionID === sessionID);
-		if (!player) return;
+		if (!player) return cb();
 		player.socketID = socket.id;
 		socket.join(roomID);
 		currentRoom = room;

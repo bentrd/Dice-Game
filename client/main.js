@@ -15,7 +15,7 @@ const socket = io();
 const sessionID = JSON.parse(localStorage.getItem("sessionID"));
 var room = JSON.parse(localStorage.getItem("room"));
 
-socket.emit("joinRoom", sessionID, room.roomID);
+socket.emit("joinRoom", sessionID, room.roomID, () => window.location.href = "/");
 
 const passTurn = () => {
 	if (room.playerToPlay.sessionID == sessionID || room.playerToPlay.socketID == socket.id) {
